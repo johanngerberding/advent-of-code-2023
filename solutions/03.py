@@ -1,9 +1,4 @@
 
-def is_symbol(c: str) -> bool: 
-    if not c.isdigit() and c != '.':
-        return True 
-    return False 
-
 def get_surrounding(x: int, y: int, max_x: int, max_y: int) -> list: 
     coords = [
         (x-1, y),
@@ -19,23 +14,26 @@ def get_surrounding(x: int, y: int, max_x: int, max_y: int) -> list:
         pos for pos in coords if pos[0] >= 0 and pos[0] <= max_x and pos[1] >= 0 and pos[1] <= max_y
     ]
 
-def get_num_surrounding(pos: list, max_x: int, max_y: int) -> list: 
-    surrs = [] 
+def get_num_surrounding(pos: list, max_x: int, max_y: int) -> set: 
+    surrs = set() 
     for p in pos: 
-        surrs += get_surrounding(p[0], p[1], max_x, max_y)
-    
+        surr = get_surrounding(p[0], p[1], max_x, max_y)
+        for s in surr: 
+            surrs.add(s) 
+
     for p in pos:
         if p in surrs: 
             surrs.remove((p[0], p[1]))
-    return list(set(surrs))
+    
+    return surrs
 
 def check_engine(example: list):
     numbers = [] 
     symbols = [] 
 
-    max_x = len(example[0]) - 1  
+    max_x = len(example[0]) - 1 
     max_y = len(example) - 1 
-
+    
     for row, ex in enumerate(example):
         # first all symbols 
         for col, c in enumerate(ex):  
@@ -50,11 +48,16 @@ def check_engine(example: list):
         ex = ''.join(ex_list)
         # then get numbers  
         nums = [el for el in ex.split(".") if el != '']
-        idxs = [ex.index(num) for num in nums]
-
+        
+        idxs = []  
+        curr_idx = 0 
+        for num in nums:  
+            idx = ex[curr_idx:].index(num)
+            idxs.append(idx + curr_idx)
+            curr_idx += (idx + len(num)) 
         for num, idx in zip(nums, idxs): 
             numbers.append((int(num), [(row, idx + col) for col in range(len(num))]))
-
+            
     result = 0
     correct_numbers = []
     for number in numbers: 
@@ -64,11 +67,9 @@ def check_engine(example: list):
             if sym in surrounding:
                 correct_numbers.append(num) 
                 result += num 
-                continue
+                continue    
 
-    print(result)
-    print(correct_numbers)
-    print(sum(correct_numbers))
+    print(result)                
 
 example = """467..114..
 ...*......
