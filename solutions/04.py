@@ -14,6 +14,8 @@ def parse(example: list):
 
     for line in example: 
         inter = line[0].intersection(line[1])
+        if '' in inter:
+            inter.remove('')
         if len(inter) == 1: 
             result += 1
         elif len(inter) > 0: 
@@ -26,6 +28,5 @@ parse(example=example)
 
 with open("./inputs/04.txt", 'r') as fp: 
     inp = [el.strip() for el in fp.readlines()]
-
 
 parse(example=inp)
