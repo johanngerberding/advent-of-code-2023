@@ -23,10 +23,34 @@ def parse(example: list):
 
     print(result)
 
+def parse2(example: list): 
+    example = [ex[ex.index(":") + 1:].strip().split("|") for ex in example]
+    example = [[set(l.strip().split(" ")) for l in el] for el in example]
+
+    multiplier = {idx: 1 for idx in range(len(example))} 
+    for idx, line in enumerate(example): 
+        
+        inter = line[0].intersection(line[1])
+        if '' in inter:
+            inter.remove('')
+
+        if idx in multiplier:
+            for _ in range(multiplier[idx]):
+                for i in range(len(inter)):
+                    if (idx + i + 1) in multiplier:
+                        multiplier[idx + i + 1] += 1 
+             
+    print(sum(multiplier.values()))
+
 parse(example=example)
+
+
 
 
 with open("./inputs/04.txt", 'r') as fp: 
     inp = [el.strip() for el in fp.readlines()]
 
 parse(example=inp)
+
+parse2(example=example)
+parse2(example=inp)
