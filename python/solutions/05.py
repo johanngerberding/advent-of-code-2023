@@ -1,7 +1,7 @@
 import tqdm 
 
 
-def solve(example):
+def solve(example, part2=False):
     example = [el.split(":") for el in example.split("\n\n")]
     example = [[el[0], el[1].strip().split("\n")] for el in example]
     seeds = [int(el) for el in example[0][1][0].split(' ')]
@@ -17,8 +17,14 @@ def solve(example):
                 return info[0] + num - info[1] 
         return num        
 
-    for m in maps:  
-        # s2d = source2dest(map_info=m[1])
+    # problem here, these are way too long because the input has big numbers 
+    if part2:
+        nseeds = []
+        for i in range(0, len(seeds), 2): 
+            nseeds += [seeds[i] + j for j in range(0, seeds[i + 1])]
+        seeds = nseeds
+    
+    for m in tqdm.tqdm(maps):  
         nseed = [] 
         for seed in seeds:
             nseed.append(transform(seed, m[1]))
@@ -67,3 +73,7 @@ with open("../inputs/05.txt", 'r') as fp:
 
 solve(example=example)
 solve(example=inp)
+
+solve(example=example, part2=True)
+# solve(example=inp, part2=True)
+# solve for the whole range at once 
