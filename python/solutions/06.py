@@ -9,7 +9,12 @@ def parse(inp: str) -> list:
     inp = [el.split(":")[1].strip().split(' ') for el in inp.split("\n")]
     inp = [[int(num) for num in el if num != ''] for el in inp]
     pairs = list(zip(inp[0], inp[1]))
-    return pairs 
+    return pairs
+
+def parse2(inp: str) -> tuple:
+    inp = [el.split(":")[1].strip().split(' ') for el in inp.split("\n")]
+    inp = [''.join(el) for el in inp]
+    return (int(inp[0]), int(inp[1]))
 
 def solve(pairs: list):
     multi = 1 
@@ -31,3 +36,6 @@ solve(example)
 
 part1 = parse(inp)
 solve(part1)
+
+part2 = parse2(inp)
+solve([part2])
