@@ -21,22 +21,20 @@ def run(nodes: list, instruction: str):
     curr = network['AAA']
     assert curr.name == 'AAA'
     steps = 0 
-    while True:
-        for side in instruction:
-            steps += 1 
-            next_node = curr.left if side == 'L' else curr.right
-            if next_node == 'ZZZ':
-                print(f"Number of steps: {steps}") 
-                return 
-            curr = network[next_node]
-
+    while not curr.name == 'ZZZ':
+        inst =  instruction[steps % len(instruction)]
+        assert inst in ['L', 'R']
+        next_node = curr.left if inst == 'L' else curr.right
+        steps += 1 
+        curr = network[next_node]
+    print(f"Number of steps: {steps}") 
 
 def parse(inp: str | list) -> tuple:
     if isinstance(inp, str): 
         inp_str = inp.split("\n")
     else: 
         inp_str = inp  
-    instruction = inp_str[0]
+    instruction = inp_str[0].strip()
     nodes = inp_str[2:]
     return instruction, nodes
 
