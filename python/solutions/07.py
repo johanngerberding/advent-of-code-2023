@@ -68,61 +68,49 @@ class Hand:
 
         if "J" in self.hand: 
             jokers = c['J']
-            diff = len(c.keys()) - jokers 
-            if diff == 1: 
-                # 5 of a kind 
+            if jokers >= 4:
                 return 0 
-            elif diff == 2: 
-                # 4 of a kind  
+            if jokers == 3:
+                del c['J'] 
+                if 2 in c.values():
+                    return 0 
                 return 1 
-            elif diff == 3: 
-                 
-                pass
-            elif diff == 4: 
-                pass
-            else: 
-                raise ValueError("Too many jokers")
-            print(f"initial type: {_type}")
-            for _ in range(jokers):
-                _type = self._new_type(_type)
-                print(f"type after joker {_}: {_type}") 
-            return _type            
+            if jokers == 2:
+                del c["J"] 
+                if 3 in c.values():
+                    return 0 
+                if 2 in c.values():
+                    return 1
+                return 3 
+            if jokers == 1:
+                del c["J"]
+                if 4 in c.values():
+                    return 0 
+                if 3 in c.values():
+                    return 1 
+                if 2 in c.values():
+                    if 1 in c.values():
+                        return 3  
+                    return 2
+                return 5 
         else: 
             return _type
     
-    def _new_type(self, _type: int) -> int: 
-        if _type == 6: 
-            # create one pair  
-            return 5  
-        if _type == 5: 
-            # create three of a kind (because its better than two pairs) 
-            return 3 
-        if _type == 4: 
-            # full house  
-            return 2   
-        if _type == 3: 
-            # four of a kind  
-            return 1  
-        if _type == 2: 
-            return 1 
-        return 0
 
 example = """32T3K 765
 T55J5 684
 KK677 28
 KTJJT 220
-QQQJA 483
-JJJJA 5000
-23JJJ 300"""
+QQQJA 483"""
 
 
 def solve(inp: str, part2: bool=False):
     hands = []
     for line in inp.split("\n"): 
         hands.append(Hand(line, part2))
-    print(hands) 
+    # print(hands) 
     hands.sort()
-    print(f"sorted: {hands}")
+    # print(f"sorted: {hands}")
     result = 0 
     for idx, hand in enumerate(hands): 
         rank = idx + 1 
@@ -134,8 +122,8 @@ solve(example)
 with open("../inputs/07.txt", "r") as fp: 
     inp = fp.read()
 
-# solve(inp)
+solve(inp)
 
 solve(example, True)
 
-# solve(inp, True)
+solve(inp, True)
