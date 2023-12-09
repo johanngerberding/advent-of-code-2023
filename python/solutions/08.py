@@ -54,6 +54,15 @@ ZZZ = (ZZZ, ZZZ)"""
 instructions, nodes = parse(example)
 run(nodes, instructions)
 
+example = """LLR
+
+AAA = (BBB, BBB)
+BBB = (AAA, ZZZ)
+ZZZ = (ZZZ, ZZZ)"""
+
+instructions, nodes = parse(example)
+run(nodes, instructions)
+
 with open("../inputs/08.txt", "r") as fp:
     inp = fp.readlines()
 
