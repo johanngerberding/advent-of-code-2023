@@ -117,13 +117,17 @@ def solve(inp: str, part2: bool=False):
         result += (rank * hand.bid)
     print(result)
 
+print("Part 1")
+print("Example: ", end="")
 solve(example)
 
 with open("../inputs/07.txt", "r") as fp: 
     inp = fp.read()
-
+print("Input: ", end="")
 solve(inp)
-
+print()
+print("Part 2")
+print("Example: ", end="")
 solve(example, True)
-
+print("Input: ", end="")
 solve(inp, True)
