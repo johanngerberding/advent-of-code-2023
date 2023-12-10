@@ -28,6 +28,30 @@ def run(nodes: list, instruction: str):
         steps += 1 
         curr = network[next_node]
     print(f"Number of steps: {steps}") 
+ 
+def run2(nodes: list, instruction: str):
+    network = {} 
+    for line in nodes:
+        node = Node(line)
+        network[node.name] = node 
+
+    curr = [node for name, node in network.items() if name[-1] == 'A']
+    print(f"Number of starting nodes: {len(curr)}") 
+    steps = 0 
+    while not end(curr):
+        inst =  instruction[steps % len(instruction)]
+        assert inst in ['L', 'R']
+        curr = [network[node.left] if inst == 'L' else network[node.right] for node in curr]
+        steps += 1 
+        # if steps % 100000 == 0: 
+            # print(f"steps: {steps}")
+    print(f"Number of steps: {steps}") 
+
+def end(nodes: list) -> bool:
+    for node in nodes: 
+        if node.name[-1] != 'Z':
+            return False 
+    return True 
 
 def parse(inp: str | list) -> tuple:
     if isinstance(inp, str): 
@@ -66,4 +90,20 @@ with open("../inputs/08.txt", "r") as fp:
 
 instructions, nodes = parse(inp)
 run(nodes, instructions)
+
+run2(nodes, instructions)
+
+example2 = """LR
+
+11A = (11B, XXX)
+11B = (XXX, 11Z)
+11Z = (11B, XXX)
+22A = (22B, XXX)
+22B = (22C, 22C)
+22C = (22Z, 22Z)
+22Z = (22B, 22B)
+XXX = (XXX, XXX)"""
+
+# instructions, nodes = parse(example2)
+# run2(nodes, instructions)
 
