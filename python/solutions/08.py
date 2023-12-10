@@ -1,3 +1,5 @@
+import math 
+import pprint
 
 class Node:
     def __init__(self, line: str): 
@@ -36,22 +38,22 @@ def run2(nodes: list, instruction: str):
         network[node.name] = node 
 
     curr = [node for name, node in network.items() if name[-1] == 'A']
-    print(f"Number of starting nodes: {len(curr)}") 
-    steps = 0 
-    while not end(curr):
-        inst =  instruction[steps % len(instruction)]
-        assert inst in ['L', 'R']
-        curr = [network[node.left] if inst == 'L' else network[node.right] for node in curr]
-        steps += 1 
-        # if steps % 100000 == 0: 
-            # print(f"steps: {steps}")
-    print(f"Number of steps: {steps}") 
+    dists = []
+    for node in curr: 
+        reached = False  
+        steps = 0 
+        curr_node = node  
+        while not reached: 
+            inst =  instruction[steps % len(instruction)]
+            curr_node = network[curr_node.left] if inst == 'L' else network[curr_node.right] 
+            steps += 1 
+            if curr_node.name[-1] == 'Z':
+                print(f"Found {node.name} -> {curr_node.name} in {steps} steps") 
+                dists.append(steps) 
+                reached = True  
+    
+    print(math.lcm(*dists))
 
-def end(nodes: list) -> bool:
-    for node in nodes: 
-        if node.name[-1] != 'Z':
-            return False 
-    return True 
 
 def parse(inp: str | list) -> tuple:
     if isinstance(inp, str): 
