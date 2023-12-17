@@ -1,19 +1,6 @@
 from collections import defaultdict
 
 
-# go through all the nodes and fill a defaultdict 
-# get cycle in subgraph
-class Node: 
-    def __init__(self, pos: tuple, symbol: str, distance: int = 0, visited: bool = False):
-        self.pos = pos 
-        self.distance = distance
-        self.symbol = symbol
-        self.visited = visited
-    
-    def __repr__(self):
-        return f"{self.symbol}: {self.pos} -> {self.distance} ({self.distance})"
-
-
 def get_connections(lines: list, row: int, col: int) -> list: 
     adjs = [] 
     char = lines[row][col]
@@ -21,74 +8,74 @@ def get_connections(lines: list, row: int, col: int) -> list:
         if char == 'S':
             if row - 1 >= 0:
                 above = lines[row - 1][col]
-                if above in "7F|": 
-                    adjs.append(Node(((row - 1), col), char))  
+                if above in "7F|S": 
+                    adjs.append(((row - 1), col))  
             if row + 1 < len(lines):
                 below = lines[row + 1][col]
-                if below in "LJ|": 
-                    adjs.append(Node(((row + 1), col), char))
+                if below in "LJ|S": 
+                    adjs.append(((row + 1), col))
             if col - 1 >= 0:
                 left = lines[row][col - 1]
-                if left in "-J7":
-                    adjs.append(Node(((col - 1), row), char))
+                if left in "-J7S":
+                    adjs.append((row, (col - 1)))
             if col + 1 < len(lines[row]):
                 right = lines[row][col + 1]
-                if right in "-J7": 
-                    adjs.append(Node(((col + 1), row), char))
+                if right in "-J7S": 
+                    adjs.append((row, (col + 1)))
         if char == '|':
             if row - 1 >= 0:
                 above = lines[row - 1][col]
-                if above in "7F|": 
-                    adjs.append(Node(((row - 1), col), char))  
+                if above in "7F|S": 
+                    adjs.append(((row - 1), col))  
             if row + 1 < len(lines):
                 below = lines[row + 1][col]
-                if below in "LJ|": 
-                    adjs.append(Node(((row + 1), col), char))
+                if below in "LJ|S": 
+                    adjs.append(((row + 1), col))
         elif char == '-':
             if col - 1 >= 0:
                 left = lines[row][col - 1]
-                if left in "-J7":
-                    adjs.append(Node(((col - 1), row), char))
+                if left in "-J7S":
+                    adjs.append((row, (col - 1)))
             if col + 1 < len(lines[row]):
                 right = lines[row][col + 1]
-                if right in "-J7": 
-                    adjs.append(Node(((col + 1), row), char)) 
+                if right in "-J7S": 
+                    adjs.append((row, (col + 1))) 
         elif char == 'L':
             if row - 1 >= 0:
                 above = lines[row - 1][col]
-                if above in "7F|":
-                    adjs.append(Node(((row - 1), col), char))
+                if above in "7F|S":
+                    adjs.append(((row - 1), col))
             if col + 1 < len(lines[row]):
                 right = lines[row][col + 1]
-                if right in "-J7": 
-                    adjs.append(Node(((col + 1), row), char))
+                if right in "-J7S": 
+                    adjs.append((row, (col + 1)))
         elif char == 'J':
             if row - 1 >= 0:
                 below = lines[row - 1][col] 
-                if below in "LJ|": 
-                    adjs.append(Node(((row - 1), col), char))
+                if below in "LJ|S": 
+                    adjs.append(((row - 1), col))
             if col - 1 >= 0:
                 left = lines[row][col - 1]
-                if left in "-J7": 
-                    adjs.append(Node(((col - 1), row), char))
+                if left in "-J7S": 
+                    adjs.append((row, (col - 1)))
         elif char == '7':
             if row + 1 < len(lines):
                 below = lines[row + 1][col] 
-                if below in "LJ|": 
-                    adjs.append(Node(((row + 1), col), char))
+                if below in "LJ|S": 
+                    adjs.append(((row + 1), col))
             if col - 1 >= 0:
                 above = lines[row][col - 1] 
-                if above in "7F|": 
-                    adjs.append(Node(((col - 1), row), char))
+                if above in "7F|S": 
+                    adjs.append((row, (col - 1)))
         elif char == 'F':
             if row + 1 < len(lines):
                 below = lines[row + 1][col]
-                if below in "LJ|": 
-                    adjs.append(Node(((row + 1), col), char))
+                if below in "LJ|S": 
+                    adjs.append(((row + 1), col))
             if col + 1 < len(lines[row]):
                 right = lines[row][col + 1]
-                if right in "-J7": 
-                    adjs.append(Node(((col + 1), row), char))
+                if right in "-J7S": 
+                    adjs.append((row, (col + 1)))
     return adjs 
 
 def parse(inp: str) -> tuple:
@@ -99,24 +86,53 @@ def parse(inp: str) -> tuple:
         for col in range(len(lines[row])):
             if lines[row][col] == 'S':
                 start = (row, col) 
-            graph[(row, col)] = get_connections(lines, row, col)                
+            if lines[row][col] != '.': 
+                graph[(row, col)] = get_connections(lines, row, col)                
     
     assert start is not None 
-    
     return graph, start
 
+def find_circle(graph: defaultdict, start: tuple) -> set | None:
+    visited = set()
+    stack = [(start, None)]  # (node, parent)
+    parent_map = {start: None}
+    
+    while stack:
+        current, parent = stack.pop()
 
-def dfs(graph: defaultdict, pos: tuple, start: tuple, step: int): 
-    step += 1 
-    graph[pos].visited = True 
-    graph[pos].distance = step
-    for el in graph: 
-        if not graph[el].visited: 
-            dfs(graph=graph, pos=el, start=start, step=step)
-        elif el == start and step == 0:
-            print("Found a cycle") 
-            return graph
-    return graph
+        if current in visited:
+            # Found a circle
+            circle_nodes = set()
+            node = parent
+
+            while node != current and node is not None:
+                circle_nodes.add(node)
+                node = parent_map[node]
+
+            circle_nodes.add(current)
+            return circle_nodes
+
+        visited.add(current)
+
+        for neighbor in graph[current]:
+            if neighbor != parent:
+                stack.append((neighbor, current))
+                parent_map[neighbor] = current
+
+    return None  # No circle found
+
+def calculate_distances(graph: defaultdict, circle_nodes: set) -> dict:
+    distances = {}
+
+    for node in circle_nodes:
+        distances[node] = {}
+        for neighbor in graph[node]:
+            if neighbor in circle_nodes:
+                # Calculate distance only for nodes on the circle
+                distances[node][neighbor] = 1  # You can modify this based on your graph structure
+
+    return distances
+
 
 example1 = """.....
 .S-7.
@@ -131,9 +147,15 @@ SJ.L7
 LJ..."""
 
 graph, start = parse(example1)
-distances = defaultdict(int)
+print(graph)
+circle_nodes = find_circle(graph, start)
+print(circle_nodes)
 
-graph = dfs(graph, start, start, -1)
-
-for el in graph:
-    print(el)
+if circle_nodes:
+    print(f"Circle Nodes: {circle_nodes}")
+    distances = calculate_distances(graph, circle_nodes)
+    print("Distances:")
+    for node in distances:
+        print(f"{node}: {distances[node]}")
+else:
+    print("No circle found.")
