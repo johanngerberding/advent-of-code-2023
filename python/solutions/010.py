@@ -128,10 +128,10 @@ def calculate_distances(graph: defaultdict, circle_nodes: set) -> dict:
         distances[node] = {}
         for neighbor in graph[node]:
             if neighbor in circle_nodes:
-                # Calculate distance only for nodes on the circle
-                distances[node][neighbor] = 1  # You can modify this based on your graph structure
+                distances[node][neighbor] = 1  
 
-    return distances
+    dists = {k: len(v) for k, v in distances.items()} 
+    return dists 
 
 
 example1 = """.....
