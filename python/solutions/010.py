@@ -34,7 +34,7 @@ def get_connections(lines: list, row: int, col: int) -> list:
         elif char == '-':
             if col - 1 >= 0:
                 left = lines[row][col - 1]
-                if left in "-J7S":
+                if left in "-LFS":
                     adjs.append((row, (col - 1)))
             if col + 1 < len(lines[row]):
                 right = lines[row][col + 1]
@@ -93,27 +93,33 @@ def parse(inp: str) -> tuple:
     return graph, start
 
 def find_circle(graph: defaultdict, start: tuple) -> set | None:
-    visited = set()
+    # visited = set()
+    visited = []
     stack = [(start, None)]  # (node, parent)
     parent_map = {start: None}
     
     while stack:
         current, parent = stack.pop()
-
+        # backtrack 
         if current in visited:
+            print("found a circle")
+            print(f"parent map: {parent_map}")
+            print(f"current: {current}") 
             # Found a circle
             circle_nodes = set()
             node = parent
 
             while node != current and node is not None:
+                print(f"add {node}") 
                 circle_nodes.add(node)
                 node = parent_map[node]
 
             circle_nodes.add(current)
             return circle_nodes
 
-        visited.add(current)
-
+        # visited.add(current)
+        visited.append(current)
+        print(f"visited: {visited}")
         for neighbor in graph[current]:
             if neighbor != parent:
                 stack.append((neighbor, current))
@@ -150,12 +156,20 @@ graph, start = parse(example1)
 print(graph)
 circle_nodes = find_circle(graph, start)
 print(circle_nodes)
+print(f"Distance: {len(circle_nodes) // 2}")
 
-if circle_nodes:
-    print(f"Circle Nodes: {circle_nodes}")
-    distances = calculate_distances(graph, circle_nodes)
-    print("Distances:")
-    for node in distances:
-        print(f"{node}: {distances[node]}")
-else:
-    print("No circle found.")
+graph, start = parse(example2)
+print(graph)
+circle_nodes = find_circle(graph, start)
+print(circle_nodes)
+print(f"Distance: {len(circle_nodes) // 2}")
+
+
+# if circle_nodes:
+#     print(f"Circle Nodes: {circle_nodes}")
+#     distances = calculate_distances(graph, circle_nodes)
+#     print("Distances:")
+#     for node in distances:
+#         print(f"{node}: {distances[node]}")
+# else:
+#     print("No circle found.")
