@@ -1,3 +1,4 @@
+from itertools import combinations
 
 
 def expand(galaxy: str): 
@@ -24,6 +25,15 @@ def expand(galaxy: str):
 
     return expanded_galaxy
 
+def get_galaxies(expanded_galaxy: list) -> list: 
+    galaxies = [] 
+    for i, row in enumerate(expanded_galaxy):
+        for j, el in enumerate(row): 
+            if el == '#':
+                galaxies.append((i, j)) 
+    return galaxies 
+
+
 example = """...#......
 .......#..
 #.........
@@ -35,4 +45,9 @@ example = """...#......
 .......#..
 #...#....."""
 
-expand(example)
+expanded = expand(example)
+galaxies = get_galaxies(expanded)
+pairs = list(combinations(galaxies, 2))
+
+print(pairs)
+print(len(pairs))
