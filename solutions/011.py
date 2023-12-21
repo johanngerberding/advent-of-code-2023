@@ -1,7 +1,6 @@
 from itertools import combinations
 
-
-def expand(galaxy: str): 
+def expand(galaxy: str) -> list: 
     rows = galaxy.split("\n")
     expand_rows = sorted([i for i, row in enumerate(rows) if len(set(row)) == 1])
     cols = [] 
@@ -34,6 +33,21 @@ def get_galaxies(expanded_galaxy: list) -> list:
     return galaxies 
 
 
+def create_grid(expanded: list) -> dict: 
+    grid = {} 
+    
+    for r, row in enumerate(expanded): 
+        for c in range(len(row)): 
+            if not (r, c) in grid: 
+                grid[(r, c)] = []
+
+            grid[(r, c)].append((r - 1, c)) if r > 0 else None
+            grid[(r, c)].append((r + 1, c)) if r < (len(expanded) - 1) else None
+            grid[(r, c)].append((r, c + 1)) if c < len(row) - 1 else None
+            grid[(r, c)].append((r, c - 1)) if c > 0 else None
+
+    return grid     
+
 example = """...#......
 .......#..
 #.........
@@ -48,6 +62,8 @@ example = """...#......
 expanded = expand(example)
 galaxies = get_galaxies(expanded)
 pairs = list(combinations(galaxies, 2))
+
+grid = create_grid(expanded)
 
 print(pairs)
 print(len(pairs))
