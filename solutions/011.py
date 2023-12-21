@@ -48,6 +48,60 @@ def create_grid(expanded: list) -> dict:
 
     return grid     
 
+def dijsktra(grid: dict, initial: tuple, end: tuple) -> int: 
+    shortest_paths = {initial: (None, 0)}
+    current_node = initial 
+    visited = set()
+
+    while current_node != end: 
+        visited.add(current_node)
+        adjs = grid[current_node]
+        weight_to_current_node = shortest_paths[current_node][1]
+
+        for adj in adjs: 
+            weight = 1 + weight_to_current_node 
+            if adj not in shortest_paths: 
+                shortest_paths[adj]  = (current_node, weight) 
+            else: 
+                current_shortest_weight = shortest_paths[adj][1] 
+                if current_shortest_weight > weight: 
+                    shortest_paths[adj] = (current_node, weight) 
+
+        next_adjs = {node: shortest_paths[node] for node in shortest_paths if node not in visited} 
+
+        if not next_adjs: 
+            return -1
+
+        current_node = min(next_adjs, key=lambda k: next_adjs[k][1])
+
+    # work back through adjs in shortest path
+    path = [] 
+    while current_node is not None: 
+        path.append(current_node)
+        next_node = shortest_paths[current_node][0]
+        current_node = next_node
+
+    # reverse path 
+    # path = path[::-1]
+    return len(path) - 1
+
+
+def solve(inp: str) -> int:
+    expanded = expand(inp)
+    galaxies = get_galaxies(expanded)
+    pairs = list(combinations(galaxies, 2))
+    grid = create_grid(expanded)
+
+    result = 0 
+    for pair in pairs: 
+        shortest_path = dijsktra(grid, pair[0], pair[1])
+        if shortest_path == -1: 
+            print(f"We have a problem, no path between {pair[0]} and {pair[1]}")
+            raise ValueError
+        result += shortest_path
+    return result
+
+
 example = """...#......
 .......#..
 #.........
@@ -59,11 +113,11 @@ example = """...#......
 .......#..
 #...#....."""
 
-expanded = expand(example)
-galaxies = get_galaxies(expanded)
-pairs = list(combinations(galaxies, 2))
+example_result = solve(example)
+print(f"Example result: {example_result}")
 
-grid = create_grid(expanded)
+with open("../inputs/011.txt", "r") as fp: 
+    data = fp.read()
 
-print(pairs)
-print(len(pairs))
+part1 = solve(data)
+print(f"Part 1: {part1}")
