@@ -15,10 +15,30 @@ def get_combinations(line: str) -> tuple:
     return list(product('.#', repeat=len(idxs))), idxs 
 
 
-def solve(inp: str):
+def extend(inp: str) -> list:
     example = inp.split("\n")
     example = [row.split(" ") for row in example]
     example = [[el[0], [int(num) for num in el[1].split(",")]] for el in example]
+
+    extended = []
+    for el in example: 
+        spring, groups = el[0], el[1]
+        extended_spring, extended_groups = spring, groups.copy() 
+        for _ in range(4): 
+            extended_spring += f"?{spring}"
+            extended_groups.extend(groups)
+        extended.append([extended_spring, extended_groups])
+
+    return extended
+
+
+def solve(inp: str, part1=True):
+    if part1: 
+        example = inp.split("\n")
+        example = [row.split(" ") for row in example]
+        example = [[el[0], [int(num) for num in el[1].split(",")]] for el in example]
+    else: 
+        example = extend(inp) 
     result = 0 
     for line in example:
         combinations, idxs = get_combinations(line[0])
@@ -51,3 +71,6 @@ with open("../inputs/012.txt", 'r') as fp:
 
 part1 = solve(data)
 print(f"Part 1: {part1}")
+
+part2 = solve(data, part1=False)
+print(f"Part 2 example: {part2}")
