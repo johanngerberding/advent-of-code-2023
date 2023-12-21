@@ -8,28 +8,17 @@ def expand(galaxy: str) -> list:
         cols.append([row[col] for row in rows]) 
     expand_cols = sorted([i for i, col in enumerate(cols) if len(set(col)) == 1])
 
-    curr_galaxy = []
-    for i, row in enumerate(rows):
-        curr_galaxy.append(row) 
-        if i in expand_rows:
-            expand_rows.pop(0)
-            curr_galaxy.append(''.join(['.' for _ in range(len(row))]))
+    return rows, expand_rows, expand_cols
 
-    expanded_galaxy = []
-    for i, row in enumerate(curr_galaxy): 
-        nrow = row  
-        for j, col in enumerate(expand_cols):
-            nrow = nrow[:col + j] + '.' + nrow[col + j:]
-        expanded_galaxy.append(nrow)
-
-    return expanded_galaxy
-
-def get_galaxies(expanded_galaxy: list) -> list: 
-    galaxies = [] 
-    for i, row in enumerate(expanded_galaxy):
+def get_galaxies(galaxy: list, expand_rows: list, expand_cols: list, expansion_factor: int) -> list: 
+    galaxies = []
+    for i, row in enumerate(galaxy):
         for j, el in enumerate(row): 
             if el == '#':
-                galaxies.append((i, j)) 
+                add_rows = len([el for el in expand_rows if el < i]) * expansion_factor
+                add_cols = len([el for el in expand_cols if el < j]) * expansion_factor 
+                galaxies.append((i + add_rows, j + add_cols)) 
+    
     return galaxies 
 
 
@@ -41,11 +30,11 @@ def get_distance(pair: tuple) -> int:
 
 
 
-def solve(inp: str) -> int:
-    expanded = expand(inp)
-    galaxies = get_galaxies(expanded)
+def solve(inp: str, expansion_factor: int) -> int:
+    galaxy, expand_rows, expand_cols = expand(inp)
+    galaxies = get_galaxies(galaxy, expand_rows, expand_cols, expansion_factor)
     pairs = list(combinations(galaxies, 2))
-
+    
     result = 0 
     for pair in pairs: 
         shortest_path = get_distance(pair) 
@@ -64,11 +53,17 @@ example = """...#......
 .......#..
 #...#....."""
 
-example_result = solve(example)
+example_result = solve(example, expansion_factor=1)
 print(f"Example result: {example_result}")
+
+example_result_2 = solve(example, expansion_factor=9)
+print(f"Example part 2: {example_result_2}")
 
 with open("../inputs/011.txt", "r") as fp: 
     data = fp.read()
 
-part1 = solve(data)
+part1 = solve(data, expansion_factor=1)
 print(f"Part 1: {part1}")
+
+part2 = solve(data, expansion_factor=1_000_000 - 1)
+print(f"Part 1: {part2}")
