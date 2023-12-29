@@ -14,19 +14,38 @@ def get_adjs(grid: list, pos: tuple) -> list:
 PATHS = []
 
 def get_all_paths_util(graph: dict, u: tuple, d: tuple, visited: dict, path: list):
-    # Mark the current node as visited and store in path
-    visited[u]= True
+    # Mark the current node as visited and store in path 
+    visited[u]= True 
     path.append(u)
 
     # If current vertex is same as destination, then print
     # current path[]
     if u == d:
-        print(path)
+        print(len(path))
         PATHS.append(path)
     else:
         # If current vertex is not destination
         # Recur for all the vertices adjacent to this vertex
         for adj in graph[u]:
+            # constraint 
+            if len(path) >= 4:
+                last_3_rows = []
+                last_3_cols = [] 
+                for i in range(-2, -5, -1): 
+                    row, col, _ = path[i] 
+                    last_3_rows.append(row)
+                    last_3_cols.append(col)
+                if len(set(last_3_cols)) == 1: 
+                    # same col 
+                    val = last_3_cols[0] 
+                    if adj[1] == val:
+                        continue 
+                elif len(set(last_3_rows)) == 1:
+                    # same row 
+                    val = last_3_rows[0]
+                    if adj[0] == val: 
+                        continue
+
             if visited[adj] is False:
                 get_all_paths_util(graph, adj, d, visited, path)
                     
