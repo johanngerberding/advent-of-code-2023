@@ -1,3 +1,5 @@
+import heapq
+
 
 def get_adjs(grid: list, pos: tuple) -> list:
     up = (pos[0] - 1, pos[1], int(grid[pos[0] - 1][pos[1]])) if pos[0] - 1 >= 0 else None 
@@ -10,80 +12,6 @@ def get_adjs(grid: list, pos: tuple) -> list:
     result.append(right) if right is not None else None
     result.append(left) if left is not None else None
     return result 
-
-PATHS = []
-
-def get_all_paths_util(graph: dict, u: tuple, d: tuple, visited: dict, path: list):
-    # Mark the current node as visited and store in path 
-    visited[u]= True 
-    path.append(u)
-
-    # If current vertex is same as destination, then print
-    # current path[]
-    if u == d:
-        print(len(path))
-        PATHS.append(path)
-    else:
-        # If current vertex is not destination
-        # Recur for all the vertices adjacent to this vertex
-        for adj in graph[u]:
-            # constraint 
-            if len(path) >= 4:
-                last_3_rows = []
-                last_3_cols = [] 
-                for i in range(-2, -5, -1): 
-                    row, col, _ = path[i] 
-                    last_3_rows.append(row)
-                    last_3_cols.append(col)
-                if len(set(last_3_cols)) == 1: 
-                    # same col 
-                    val = last_3_cols[0] 
-                    if adj[1] == val:
-                        continue 
-                elif len(set(last_3_rows)) == 1:
-                    # same row 
-                    val = last_3_rows[0]
-                    if adj[0] == val: 
-                        continue
-
-            if visited[adj] is False:
-                get_all_paths_util(graph, adj, d, visited, path)
-                    
-    # Remove current vertex from path[] and mark it as unvisited
-    path.pop()
-    visited[u]= False
-
-
-# Prints all paths from 's' to 'd'
-def get_all_paths(graph: dict, s: tuple, d: tuple):
-
-    # Mark all the vertices as not visited
-    visited = {node: False for node in graph} 
-
-    # Create an array to store paths
-    path = []
-    # Call the recursive helper function to print all paths
-    get_all_paths_util(graph, s, d, visited, path)
-
-def find_all_paths(graph: dict, start: tuple, end: tuple, path=None, visited=None):
-    if visited is None:
-        visited = set()
-    if path is None:
-        path = [] 
-    visited.add(start) 
-    path = path + [start]
-    if start == end:
-        return [path]
-    if start not in graph:
-        return []
-    paths = []
-    for node in graph[start]:
-        if node not in visited:
-            new_paths = find_all_paths(graph, node, end, path, visited)
-            for new_path in new_paths:
-                paths.append(new_path)
-    visited.remove(start) 
-    return paths
 
 
 example = """2413432311323
@@ -101,7 +29,7 @@ example = """2413432311323
 4322674655533"""
 
 grid = [[el for el in row] for row in example.split("\n")]
-start = (0,0,int(grid[0][0])) # row, col, cost, path 
+start = (0,0,int(grid[0][0])) # row, col, cost 
 end = (len(grid) - 1, len(grid[0]) - 1, int(grid[len(grid) - 1][len(grid[0]) - 1]))
 print(f"{start} -> {end}")
 
@@ -115,9 +43,28 @@ for row in range(len(grid)):
 assert end in graph 
 assert start in graph
 
-get_all_paths(graph, start, end)
-print(len(PATHS))
-print(PATHS[0])
+dist = {node: float('inf') for node in graph}
+seen = set()
+heap = []
+dist[start] = 0
+
+heapq.heappush(heap, (start, dist[start]))
+
+while len(heap) > 0:
+    node, weight = heapq.heappop(heap)
+    seen.add(node)
+
+    for conn in graph[node]:
+        if conn not in seen:
+            d = weight + conn[2] 
+            if d < dist[conn]:
+                dist[conn] = d
+                heapq.heappush(heap, (conn, d))
+
+
+print(dist[end])
+
+
 
 """
 unvisited_nodes = set() 
