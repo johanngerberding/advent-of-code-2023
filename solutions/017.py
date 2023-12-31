@@ -1,4 +1,5 @@
 import heapq
+from collections import defaultdict
 
 
 def get_adjs(grid: list, pos: tuple) -> list:
@@ -44,6 +45,7 @@ assert end in graph
 assert start in graph
 
 dist = {node: float('inf') for node in graph}
+prev = defaultdict(tuple) 
 seen = set()
 heap = []
 dist[start] = 0
@@ -53,17 +55,38 @@ heapq.heappush(heap, (start, dist[start]))
 while len(heap) > 0:
     node, weight = heapq.heappop(heap)
     seen.add(node)
+    # check the last 3 nodes
+    last3 = [prev[node], prev[prev[node]], prev[prev[prev[node]]]]
+    last3 = [el for el in last3 if len(el) == 3] 
+    forbidden_col = None 
+    forbidden_row = None 
+    if len(last3) == 3: 
+        rows = len(set([el[0] for el in last3])) == 1
+        if rows: 
+            print(last3)         
+            forbidden_row = last3[0][0] 
+            print(f"forbidden row: {forbidden_row}")
+        cols = len(set([el[1] for el in last3])) == 1
+        if cols:    
+            print(last3)
+            forbidden_col = last3[0][1]
+            print(f"forbidden col: {forbidden_col}")
 
     for conn in graph[node]:
         if conn not in seen:
+            if forbidden_row is not None and conn[0] == forbidden_row:
+                continue 
+            if forbidden_col is not None and conn[1] == forbidden_col:
+                continue
             d = weight + conn[2] 
             if d < dist[conn]:
                 dist[conn] = d
                 heapq.heappush(heap, (conn, d))
+                prev[conn] = node
 
 
 print(dist[end])
-
+print(prev[end])
 
 
 """
