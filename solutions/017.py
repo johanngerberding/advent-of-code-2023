@@ -1,19 +1,4 @@
 import heapq
-from collections import defaultdict
-
-
-def get_adjs(grid: list, pos: tuple) -> list:
-    up = (pos[0] - 1, pos[1], int(grid[pos[0] - 1][pos[1]])) if pos[0] - 1 >= 0 else None 
-    down = (pos[0] + 1, pos[1], int(grid[pos[0] + 1][pos[1]])) if pos[0] + 1 <= (len(grid) - 1) else None 
-    right = (pos[0], pos[1] + 1, int(grid[pos[0]][pos[1] + 1])) if pos[1] + 1 <= (len(grid[0]) - 1) else None 
-    left = (pos[0], pos[1] - 1, int(grid[pos[0]][pos[1] - 1])) if pos[1] - 1 >= 0 else None  
-    result = []
-    result.append(up) if up is not None else None
-    result.append(down) if down is not None else None
-    result.append(right) if right is not None else None
-    result.append(left) if left is not None else None
-    return result 
-
 
 example = """2413432311323
 3215453535623
@@ -29,129 +14,49 @@ example = """2413432311323
 2546548887735
 4322674655533"""
 
-grid = [[el for el in row] for row in example.split("\n")]
-start = (0,0,int(grid[0][0])) # row, col, cost 
-end = (len(grid) - 1, len(grid[0]) - 1, int(grid[len(grid) - 1][len(grid[0]) - 1]))
-print(f"{start} -> {end}")
+with open("../inputs/017.txt", "r") as fp: 
+    data = fp.read()
 
-graph = {}
-for row in range(len(grid)):
-    for col in range(len(grid[0])):
-        node = (row, col, int(grid[row][col]))
-        adjs = get_adjs(grid, node)
-        graph[node] = adjs
-
-assert end in graph 
-assert start in graph
-
-dist = {node: float('inf') for node in graph}
-prev = defaultdict(tuple) 
-seen = set()
-heap = []
-dist[start] = 0
-
-heapq.heappush(heap, (start, dist[start]))
-
-while len(heap) > 0:
-    node, weight = heapq.heappop(heap)
-    seen.add(node)
-    # check the last 3 nodes
-    last3 = [prev[node], prev[prev[node]], prev[prev[prev[node]]]]
-    last3 = [el for el in last3 if len(el) == 3] 
-    forbidden_col = None 
-    forbidden_row = None 
-    if len(last3) == 3: 
-        rows = len(set([el[0] for el in last3])) == 1
-        if rows: 
-            print(last3)         
-            forbidden_row = last3[0][0] 
-            print(f"forbidden row: {forbidden_row}")
-        cols = len(set([el[1] for el in last3])) == 1
-        if cols:    
-            print(last3)
-            forbidden_col = last3[0][1]
-            print(f"forbidden col: {forbidden_col}")
-
-    for conn in graph[node]:
-        if conn not in seen:
-            if forbidden_row is not None and conn[0] == forbidden_row:
-                continue 
-            if forbidden_col is not None and conn[1] == forbidden_col:
-                continue
-            d = weight + conn[2] 
-            if d < dist[conn]:
-                dist[conn] = d
-                heapq.heappush(heap, (conn, d))
-                prev[conn] = node
+grid = [[el for el in row] for row in data.split("\n")]
+R = len(grid)
+C = len(grid[0])
 
 
-print(dist[end])
-print(prev[end])
+def solve(part2):
+    distances = {}
+    heap = [(0, 0, 0, -1, -1)]
 
+    while heap: 
+        dist, r, c, dir_, indir = heapq.heappop(heap)
+        if (r, c, dir_, indir) in distances:
+            continue 
+        distances[(r, c, dir_, indir)] = dist 
+        for i, (dr, dc) in enumerate([[-1, 0], [0, 1], [1, 0], [0, -1]]):
+            rr = r + dr 
+            cc = c + dc 
+            new_dir = i 
+            new_indir = (1 if new_dir != dir_ else indir + 1)
+            
+            isnt_reverse = ((new_dir + 2) % 4 != dir_)
+            
+            is_valid_part1 = (new_indir <= 3) 
+            is_valid_part2 = (new_indir <= 10 and (new_dir == dir_ or indir >= 4 or indir == -1))
+            isvalid = (is_valid_part2 if part2 else is_valid_part1)
 
-"""
-unvisited_nodes = set() 
-distances = {node: 1000000 for node in unvisited_nodes} 
-distances[start] = 0 
-previous = {}
+            if 0 <= rr < R and 0 <= cc < C and isnt_reverse and isvalid:
+                cost = int(grid[rr][cc])
+                if (rr, cc, new_dir, new_indir) in distances: 
+                    continue 
+                heapq.heappush(heap, (dist + cost, rr, cc, new_dir, new_indir))
 
-while unvisited_nodes:
-    current_min_node = None
-    for node in unvisited_nodes: 
-        if current_min_node is None:
-            current_min_node = node
-        elif distances[node] < distances[current_min_node]:
-            current_min_node = node
+    ans = 1e9 
+    for (r, c, dir_, indir), v in distances.items():
+        if r == R - 1 and c == C - 1 and (indir >= 4 or not part2):
+            ans = min(ans, v)
 
-    assert current_min_node
-    # [up, right, down, left]
-    neighbors = get_adjs(grid, current_min_node)
+    print(ans)
 
-    # constraint -> take out the direction which was executed the last three times
-    last_3 = []
-    x0, y0, _ = current_min_node 
-    for _ in range(3):
-        if previous.get(current_min_node):
-            x1, y1, _ = previous[current_min_node] 
-            if x0 == x1: 
-                y = y0 - y1 
-                last_3.append(0) if y == 1 else last_3.append(2)
-            else: 
-                x = x0 - x1
-                last_3.append(1) if x == -1 else last_3.append(3)
-
-    if len(set(last_3)) == 1:
-        print(f"Found 3 consecutive moves: {last_3}") 
-        neighbors[last_3[0]] = None 
-        print(neighbors)
-
-    for neighbor in neighbors:
-        if neighbor: 
-            temp_distance = distances[current_min_node] + neighbor[2] 
-            if neighbor in distances:
-                if temp_distance < distances[neighbor]: 
-                    distances[neighbor] = temp_distance 
-            else: 
-                distances[neighbor] = temp_distance
-            previous[neighbor] = current_min_node
-
-    unvisited_nodes.remove(current_min_node)
-
-
-print(distances[end])
-
-
-path = []
-node = end 
-
-while node != start:
-    path.append(node)
-    node = previous[node]
-
-# Add the start node manually
-path.append(start)
-
-print("We found the following best path with a value of {}.".format(distances[end]))
-print(" -> ".join(reversed(path)))
-"""
-
+print(f"Part 1: ", end="")
+solve(False)
+print(f"Part 2: ", end="")
+solve(True)
