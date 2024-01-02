@@ -124,6 +124,6 @@ solve(dig_plan_example, True)
 with open("../inputs/018.txt", 'r') as fp: 
     data = fp.read()
 
-# hdig_plan = parse(data)
-# solve(dig_plan=dig_plan, part2=False)
+dig_plan = parse(data)
+solve(dig_plan=dig_plan, part2=False)
 
