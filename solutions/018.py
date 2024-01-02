@@ -1,5 +1,25 @@
 from shapely.geometry import Polygon, Point
 from collections import defaultdict
+from itertools import groupby
+from operator import itemgetter 
+
+
+def reduce(cols: list) -> list: 
+    cols.sort() 
+    new_ranges = [] 
+
+    left, right = cols[0]
+    for col in cols[1:]:
+        next_left, next_right = col
+        if right + 1 < next_left: 
+            new_ranges.append((left, right)) 
+            left, right = col  
+        else: 
+            right = max(right, next_right) 
+
+    new_ranges.append((left, right)) 
+    return new_ranges
+
 
 def parse(inp: str) -> list:
     dig_plan = inp.split("\n")
@@ -19,7 +39,6 @@ def solve(dig_plan: list, part2: bool):
     coordinates = [(0, 0)]
     dist = 0 
     rows = defaultdict(set) 
-    # rows[0].add(0)
 
     for el in dig_plan: 
         curr = coordinates[-1] 
@@ -56,18 +75,31 @@ def solve(dig_plan: list, part2: bool):
     # this could be done much smarter  
     # reduce consecutive blocks to start + end points
     for x in range(min_x, max_x + 1):
+        row_area = 0 
         cols = sorted(list(rows[x]))
-        values = set()
-        # reduce the tuples 
-        for col in cols:  
-            for i in range(col[0], col[1] + 1):
-                values.add(i)
+        correct_cols = [
+            (min([el[0], el[1]]), max([el[0], el[1]])) for el in cols
+        ] 
+        correct_cols = reduce(correct_cols) 
+        
+        # for i in range(1, len(correct_cols)):
+        #     row_area += correct_cols[i][0] - correct_cols[i-1][1]
+        #     if row_area != 0: 
+        #         row_area += 1 
+        if len(correct_cols) == 1: 
+            row_area += (correct_cols[0][1] + 1 - correct_cols[0][0]) 
+        else:
+            for col in correct_cols: 
+                if col[0] != col[1]: 
+                    row_area += (col[1] - col[0])
+            for i in range(1, len(correct_cols)): 
+                row_area += (correct_cols[i][0] + 1 - correct_cols[i - 1][1])
         # assert len(cols) % 2 == 0
         # for y in range(min_y, max_y + 1):
         #     if pgon.contains(Point(x, y)): 
         #         area += 1
-        print(f"row {x}: {len(values)}") 
-        area += len(values)        
+        # print(f"row {x}: {correct_cols} -> {row_area}") 
+        area += row_area 
     print(area)
 
 example = """R 6 (#70c710)
@@ -87,7 +119,7 @@ U 2 (#7a21e3)"""
 
 dig_plan_example = parse(example)
 solve(dig_plan_example, False)
-# solve(dig_plan_example, True)
+solve(dig_plan_example, True)
 
 with open("../inputs/018.txt", 'r') as fp: 
     data = fp.read()
