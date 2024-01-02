@@ -1,18 +1,5 @@
-import numpy as np 
-import cv2 
 from shapely.geometry import Polygon, Point
 
-
-# shoelace formula 
-def area_(corners: list) -> float:
-    n = len(corners) # of corners
-    area = 0.0
-    for i in range(n):
-        j = (i + 1) % n
-        area += corners[i][0] * corners[j][1]
-        area -= corners[j][0] * corners[i][1]
-    area = abs(area) / 2.0
-    return area
 
 def parse(inp: str) -> list:
     dig_plan = inp.split("\n")
@@ -23,7 +10,12 @@ def parse(inp: str) -> list:
 
 
 def solve(dig_plan: list, part2: bool): 
-# list of coordinates 
+    if part2: 
+        num2dir = {0: 'R', 1: 'D', 2: 'L', 3: 'U'}
+        correct_dig_plan = [[num2dir[int(el[2][-1])], int(el[2][1:-1], 16)] for el in dig_plan] 
+        dig_plan = correct_dig_plan 
+
+    # list of coordinates 
     coordinates = [(0, 0)]
     dist = 0 
     for el in dig_plan: 
@@ -45,19 +37,14 @@ def solve(dig_plan: list, part2: bool):
     max_x = max([el[0] for el in coordinates])
     min_y = min([el[1] for el in coordinates]) 
     max_y = max([el[1] for el in coordinates])
+    
     area = 0
     for x in range(min_x, max_x + 1): 
         for y in range(min_y, max_y + 1):
-            if (x, y) in coordinates:   
-                area += 1
-            else: 
-                # determine if point inside polygon (ray casting)
-                if pgon.contains(Point(x, y)): 
-                    area += 1 
-                elif pgon.touches(Point(x, y)): 
-                    area += 1 
-
-    print(area)
+            if pgon.contains(Point(x, y)): 
+                area += 1 
+            
+    print(area + dist)
 
 example = """R 6 (#70c710)
 D 5 (#0dc571)
@@ -76,6 +63,7 @@ U 2 (#7a21e3)"""
 
 dig_plan_example = parse(example)
 solve(dig_plan_example, False)
+solve(dig_plan_example, True)
 
 with open("../inputs/018.txt", 'r') as fp: 
     data = fp.read()
