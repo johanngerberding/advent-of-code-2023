@@ -47,7 +47,7 @@ def process(curr: list, rating: dict) -> str:
             print("Problem") 
     return workflow[0] 
 
-def solve(inp, part2=False) -> int:
+def solve(inp) -> int:
     workflows, ratings = parse(inp)
     result = 0
     for rating in ratings: 
@@ -115,4 +115,47 @@ for k, vals in workflows.items():
             graph[k].append(val)
 
 print(graph)
+xmas = {
+    'x': [1, 4000],
+    'm': [1, 4000],
+    'a': [1, 4000],
+    's': [1, 4000],
+}
+
 # dfs until find A -> path to A -> from path build conditions/ranges for values
+
+def get_paths(root):
+    x = []
+    children = graph[root]
+    if children:
+        for c in children:
+            for el in get_paths(c):
+                x.append(c + " " + el)
+    else:
+        x.append("")
+    return x
+
+paths = get_paths("in")
+paths = [path.strip().split(" ") for path in paths]
+paths = [["in"] + path for path in paths if path[-1] == 'A']
+print(paths)
+
+for path in paths:
+    for i in range(1, len(path)):
+        curr = path[i -1]
+        if curr == 'A':
+            break
+        nxt = path[i]
+        workflow = workflows[curr]
+        true_condition = None 
+        for i, option in enumerate(workflow): 
+            if nxt in option: 
+                true_condition = option 
+                false_conditions = workflow[:i]
+                print(f"condition: {true_condition}")
+                print(f"not conditions: {false_conditions}")
+                break 
+        print(workflow)
+        break
+
+
