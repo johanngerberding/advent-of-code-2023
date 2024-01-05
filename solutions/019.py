@@ -89,3 +89,15 @@ with open("../inputs/019.txt", "r") as fp:
 
 print(f"Part 1: {solve(data)}")
 
+
+# part 2 -> (x, m, a, s) 
+# all possible combinations from 1 to 4000 for every value 
+# how many will be accepted
+# how to do this efficiently??? 
+# other way around, get all combinations that lead to 'A' as ranges? 
+# build a graph from the workflow 
+# find all nodes with an 'A' as a possible outcome 
+# backtrack from 'A'?? 
+# output ->  a: [condition for every reachable 'A'?] 
+
+
