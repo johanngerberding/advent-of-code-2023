@@ -101,3 +101,18 @@ print(f"Part 1: {solve(data)}")
 # output ->  a: [condition for every reachable 'A'?] 
 
 
+workflows, ratings = parse(example)
+print(workflows)
+from collections import defaultdict
+
+graph = defaultdict(list) 
+for k, vals in workflows.items():
+    for val in vals: 
+        if ":" in val:
+            cond = val.split(":")[0] 
+            graph[k].append(val.split(":")[1]) 
+        else: 
+            graph[k].append(val)
+
+print(graph)
+# dfs until find A -> path to A -> from path build conditions/ranges for values
