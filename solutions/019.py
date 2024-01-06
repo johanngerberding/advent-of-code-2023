@@ -64,70 +64,37 @@ def solve(inp) -> int:
     return result
 
 
-example = """px{a<2006:qkq,m>2090:A,rfg}
-pv{a>1716:R,A}
-lnx{m>1548:A,A}
-rfg{s<537:gd,x>2440:R,A}
-qs{s>3448:A,lnx}
-qkq{x<1416:A,crn}
-crn{x>2662:A,R}
-in{s<1351:px,qqz}
-qqz{s>2770:qs,m<1801:hdj,R}
-gd{a>3333:R,R}
-hdj{m>838:A,pv}
-
-{x=787,m=2655,a=1222,s=2876}
-{x=1679,m=44,a=2067,s=496}
-{x=2036,m=264,a=79,s=2244}
-{x=2461,m=1339,a=466,s=291}
-{x=2127,m=1623,a=2188,s=1013}"""
-
-print(f"Example result: {solve(example)}")
-
-with open("../inputs/019.txt", "r") as fp: 
-    data = fp.read()
-
-print(f"Part 1: {solve(data)}")
-
-
-# part 2 -> (x, m, a, s) 
-# all possible combinations from 1 to 4000 for every value 
-# how many will be accepted
-# how to do this efficiently??? 
-# other way around, get all combinations that lead to 'A' as ranges? 
-# build a graph from the workflow 
-# find all nodes with an 'A' as a possible outcome 
-# backtrack from 'A'?? 
-# output ->  a: [condition for every reachable 'A'?] 
-
-
-workflows, ratings = parse(example)
-print(workflows)
-
-graph = defaultdict(list) 
-for k, vals in workflows.items():
-    for val in vals: 
-        if ":" in val:
-            cond = val.split(":")[0] 
-            graph[k].append(val.split(":")[1]) 
-        else: 
-            graph[k].append(val)
-
-print(graph)
+def create_graph(workflows: dict) -> defaultdict:
+    graph = defaultdict(list) 
+    for k, vals in workflows.items():
+        for val in vals: 
+            if ":" in val:
+                graph[k].append(val.split(":")[1]) 
+            else: 
+                graph[k].append(val)
+    return graph
 
 
 # dfs until find A -> path to A -> from path build conditions/ranges for values
 
-def get_paths(root):
-    x = []
+def create_paths(root, graph):
+    paths = get_paths(root, graph)
+    paths = [path.strip().split(" ") for path in paths]
+    paths = [["in"] + path for path in paths if path[-1] == 'A']
+    paths = [tuple(el) for el in paths]
+    paths = list(set(paths))
+    return paths
+
+def get_paths(root, graph):
+    paths = []
     children = graph[root]
     if children:
         for c in children:
-            for el in get_paths(c):
-                x.append(c + " " + el)
+            for el in get_paths(c, graph):
+                paths.append(c + " " + el)
     else:
-        x.append("")
-    return x
+        paths.append("")
+    return paths
 
 
 def solve2(paths: list, workflows: dict):
@@ -160,11 +127,11 @@ def solve2(paths: list, workflows: dict):
                         if '>' in val: 
                             # this means upper bound is smaller than num  
                             if int(num) < xmas[c][1]: 
-                                xmas[c][1] = int(num) 
+                                xmas[c][1] = int(num) - 1
                         elif '<' in val: 
                             # lower bound 
                             if int(num) > xmas[c][0]: 
-                                xmas[c][0] = int(num)
+                                xmas[c][0] = int(num) + 1 
 
                     true_condition = true_condition.split(":")[0]
                     c = true_condition[0]
@@ -172,13 +139,15 @@ def solve2(paths: list, workflows: dict):
                     if '>' in true_condition: 
                         # lower bound   
                         if int(num) > xmas[c][0]: 
-                            xmas[c][0] = int(num) 
+                            xmas[c][0] = int(num) + 1 
                     elif '<' in true_condition: 
                         # upper bound 
                         if int(num) < xmas[c][1]: 
-                            xmas[c][1] = int(num)
-    
+                            xmas[c][1] = int(num) - 1
+
         ranges.append(xmas) 
+        print(path)
+        print(xmas)
 
     combs = []
     for r in ranges:
@@ -187,12 +156,37 @@ def solve2(paths: list, workflows: dict):
         a = r['a'][1] + 1 - r['a'][0]
         s = r['s'][1] + 1 - r['s'][0]
         combs.append(x * m * a * s)
-    print(combs)
     print(sum(combs))
 
-paths = get_paths("in")
-paths = [path.strip().split(" ") for path in paths]
-paths = [["in"] + path for path in paths if path[-1] == 'A']
-print(paths)
+
+example = """px{a<2006:qkq,m>2090:A,rfg}
+pv{a>1716:R,A}
+lnx{m>1548:A,A}
+rfg{s<537:gd,x>2440:R,A}
+qs{s>3448:A,lnx}
+qkq{x<1416:A,crn}
+crn{x>2662:A,R}
+in{s<1351:px,qqz}
+qqz{s>2770:qs,m<1801:hdj,R}
+gd{a>3333:R,R}
+hdj{m>838:A,pv}
+
+{x=787,m=2655,a=1222,s=2876}
+{x=1679,m=44,a=2067,s=496}
+{x=2036,m=264,a=79,s=2244}
+{x=2461,m=1339,a=466,s=291}
+{x=2127,m=1623,a=2188,s=1013}"""
+
+print(f"Example result: {solve(example)}")
+
+with open("../inputs/019.txt", "r") as fp: 
+    data = fp.read()
+
+print(f"Part 1: {solve(data)}")
+
+
+workflows, ratings = parse(example)
+graph = create_graph(workflows)
+paths = create_paths("in", graph)
 
 solve2(paths, workflows)
