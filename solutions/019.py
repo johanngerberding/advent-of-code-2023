@@ -115,12 +115,7 @@ for k, vals in workflows.items():
             graph[k].append(val)
 
 print(graph)
-xmas = {
-    'x': [1, 4000],
-    'm': [1, 4000],
-    'a': [1, 4000],
-    's': [1, 4000],
-}
+
 
 # dfs until find A -> path to A -> from path build conditions/ranges for values
 
@@ -135,27 +130,74 @@ def get_paths(root):
         x.append("")
     return x
 
+
+def solve2(paths: list, workflows: dict):
+    ranges = [] 
+    for path in paths:
+        xmas = {
+            'x': [1, 4000],
+            'm': [1, 4000],
+            'a': [1, 4000],
+            's': [1, 4000],
+        }
+        for i in range(1, len(path)):
+            curr = path[i -1]
+            if curr == 'A':
+                break
+            nxt = path[i]
+            workflow = workflows[curr]
+            true_condition = None 
+            for i, option in enumerate(workflow): 
+                if nxt in option: 
+                    true_condition = option 
+                    false_conditions = workflow[:i]
+                    print(f"condition: {true_condition}")
+                    print(f"not conditions: {false_conditions}")
+                    
+                    for false_condition in false_conditions:
+                        val = false_condition.split(":")[0]
+                        c = val[0]
+                        num = val[2:]
+                        if '>' in val: 
+                            # this means upper bound is smaller than num  
+                            if int(num) < xmas[c][1]: 
+                                xmas[c][1] = int(num) 
+                        elif '<' in val: 
+                            # lower bound 
+                            if int(num) > xmas[c][0]: 
+                                xmas[c][0] = int(num)
+
+                    true_condition = true_condition.split(":")[0]
+                    c = true_condition[0]
+                    num = true_condition[2:]
+                    if '>' in true_condition: 
+                        # lower bound   
+                        if int(num) > xmas[c][0]: 
+                            xmas[c][0] = int(num) 
+                    elif '<' in true_condition: 
+                        # upper bound 
+                        if int(num) < xmas[c][1]: 
+                            xmas[c][1] = int(num)
+    
+        ranges.append(xmas) 
+
+    for r in ranges:
+        x =  list(range(r['x'][0], r['x'][1] + 1))
+        m =  list(range(r['m'][0], r['m'][1] + 1))
+        a =  list(range(r['a'][0], r['a'][1] + 1))
+        s =  list(range(r['s'][0], r['s'][1] + 1))
+        unique_combinations = set() 
+        for i in range(len(x)):
+            for j in range(len(m)):
+                for p in range(len(a)):
+                    for k in range(len(s)):
+                       unique_combinations.add((x[i], m[j], a[p], s[k])) 
+
+        print(len(unique_combinations))
+
 paths = get_paths("in")
 paths = [path.strip().split(" ") for path in paths]
 paths = [["in"] + path for path in paths if path[-1] == 'A']
 print(paths)
 
-for path in paths:
-    for i in range(1, len(path)):
-        curr = path[i -1]
-        if curr == 'A':
-            break
-        nxt = path[i]
-        workflow = workflows[curr]
-        true_condition = None 
-        for i, option in enumerate(workflow): 
-            if nxt in option: 
-                true_condition = option 
-                false_conditions = workflow[:i]
-                print(f"condition: {true_condition}")
-                print(f"not conditions: {false_conditions}")
-                break 
-        print(workflow)
-        break
-
-
+solve2(paths, workflows)
