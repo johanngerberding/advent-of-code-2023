@@ -155,6 +155,9 @@ def solve2(paths: list, workflows: dict):
         m = r['m'][1] + 1 - r['m'][0]
         a = r['a'][1] + 1 - r['a'][0]
         s = r['s'][1] + 1 - r['s'][0]
+        if x < 0 or m < 0 or a < 0 or s < 0:
+            print(f"One path is impossible. ({x, m, a, s})") 
+            continue 
         combs.append(x * m * a * s)
     print(sum(combs))
 
@@ -190,3 +193,9 @@ graph = create_graph(workflows)
 paths = create_paths("in", graph)
 
 solve2(paths, workflows)
+
+workflows, ratings = parse(data)
+graph = create_graph(workflows)
+paths = create_paths("in", graph)
+
+# solve2(paths, workflows)
