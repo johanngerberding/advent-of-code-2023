@@ -1,4 +1,4 @@
-
+from collections import defaultdict
 
 
 def parse(inp: str): 
@@ -103,7 +103,6 @@ print(f"Part 1: {solve(data)}")
 
 workflows, ratings = parse(example)
 print(workflows)
-from collections import defaultdict
 
 graph = defaultdict(list) 
 for k, vals in workflows.items():
@@ -151,8 +150,8 @@ def solve2(paths: list, workflows: dict):
                 if nxt in option: 
                     true_condition = option 
                     false_conditions = workflow[:i]
-                    print(f"condition: {true_condition}")
-                    print(f"not conditions: {false_conditions}")
+                    # print(f"condition: {true_condition}")
+                    # print(f"not conditions: {false_conditions}")
                     
                     for false_condition in false_conditions:
                         val = false_condition.split(":")[0]
@@ -181,19 +180,15 @@ def solve2(paths: list, workflows: dict):
     
         ranges.append(xmas) 
 
+    combs = []
     for r in ranges:
-        x =  list(range(r['x'][0], r['x'][1] + 1))
-        m =  list(range(r['m'][0], r['m'][1] + 1))
-        a =  list(range(r['a'][0], r['a'][1] + 1))
-        s =  list(range(r['s'][0], r['s'][1] + 1))
-        unique_combinations = set() 
-        for i in range(len(x)):
-            for j in range(len(m)):
-                for p in range(len(a)):
-                    for k in range(len(s)):
-                       unique_combinations.add((x[i], m[j], a[p], s[k])) 
-
-        print(len(unique_combinations))
+        x = r['x'][1] + 1 - r['x'][0]
+        m = r['m'][1] + 1 - r['m'][0]
+        a = r['a'][1] + 1 - r['a'][0]
+        s = r['s'][1] + 1 - r['s'][0]
+        combs.append(x * m * a * s)
+    print(combs)
+    print(sum(combs))
 
 paths = get_paths("in")
 paths = [path.strip().split(" ") for path in paths]
