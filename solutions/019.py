@@ -119,7 +119,7 @@ def solve2(paths: list, workflows: dict):
                     false_conditions = workflow[:i]
                     # print(f"condition: {true_condition}")
                     # print(f"not conditions: {false_conditions}")
-                    
+                    # there could be 0 -> n false conditions before the true condition 
                     for false_condition in false_conditions:
                         val = false_condition.split(":")[0]
                         c = val[0]
@@ -132,7 +132,7 @@ def solve2(paths: list, workflows: dict):
                             # lower bound 
                             if int(num) > xmas[c][0]: 
                                 xmas[c][0] = int(num) + 1 
-
+                    # there is just one true condition
                     true_condition = true_condition.split(":")[0]
                     c = true_condition[0]
                     num = true_condition[2:]
@@ -146,8 +146,8 @@ def solve2(paths: list, workflows: dict):
                             xmas[c][1] = int(num) - 1
 
         ranges.append(xmas) 
-        print(path)
-        print(xmas)
+        # print(path)
+        # print(xmas)
 
     combs = []
     for r in ranges:
@@ -157,10 +157,10 @@ def solve2(paths: list, workflows: dict):
         s = r['s'][1] + 1 - r['s'][0]
         if x < 0 or m < 0 or a < 0 or s < 0:
             print(f"One path is impossible. ({x, m, a, s})") 
+            combs.append(4000 * 4000 * 4000 * 677) 
             continue 
         combs.append(x * m * a * s)
     print(sum(combs))
-
 
 example = """px{a<2006:qkq,m>2090:A,rfg}
 pv{a>1716:R,A}
@@ -192,6 +192,7 @@ workflows, ratings = parse(example)
 graph = create_graph(workflows)
 paths = create_paths("in", graph)
 
+print("Example Part 2: ", end="")
 solve2(paths, workflows)
 
 workflows, ratings = parse(data)
@@ -199,3 +200,5 @@ graph = create_graph(workflows)
 paths = create_paths("in", graph)
 
 # solve2(paths, workflows)
+
+# one open problem -> lnx has two options which overlap, in both cases you will go to A 
