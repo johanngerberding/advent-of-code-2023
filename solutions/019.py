@@ -147,7 +147,7 @@ def solve2(paths: list, workflows: dict):
 
         ranges.append(xmas) 
         # print(path)
-        # print(xmas)
+        print(xmas)
 
     combs = []
     for r in ranges:
@@ -157,6 +157,8 @@ def solve2(paths: list, workflows: dict):
         s = r['s'][1] + 1 - r['s'][0]
         if x < 0 or m < 0 or a < 0 or s < 0:
             print(f"One path is impossible. ({x, m, a, s})") 
+            # hardcoded for now because of the lnx problem
+            # problem -> result is still wrong 
             combs.append(4000 * 4000 * 4000 * 677) 
             continue 
         combs.append(x * m * a * s)
@@ -192,13 +194,84 @@ workflows, ratings = parse(example)
 graph = create_graph(workflows)
 paths = create_paths("in", graph)
 
-print("Example Part 2: ", end="")
+# print("Example Part 2: ", end="")
 solve2(paths, workflows)
 
-workflows, ratings = parse(data)
-graph = create_graph(workflows)
-paths = create_paths("in", graph)
+# workflows, ratings = parse(data)
+# graph = create_graph(workflows)
+# paths = create_paths("in", graph)
 
 # solve2(paths, workflows)
 
 # one open problem -> lnx has two options which overlap, in both cases you will go to A 
+
+
+# source: https://github.com/jonathanpaulson/AdventOfCode/blob/master/2023/19.py
+# If we started with a pile of parts with range [lo,hi], which of those parts still follow the rule op(n)?
+from collections import deque
+
+with open("../inputs/019.txt", "r") as fp: 
+   data = fp.read()
+rules, parts = data.split('\n\n')
+R = {}
+for rule in rules.split('\n'):
+  name, rest = rule.split('{')
+  R[name] = rest[:-1]
+
+def new_range(op, n, lo, hi):
+  if op=='>':
+    lo = max(lo, n+1)
+  elif op=='<':
+    hi = min(hi, n-1)
+  elif op=='>=':
+    lo = max(lo, n)
+  elif op=='<=':
+    hi = min(hi, n)
+  else:
+    assert False
+  return (lo,hi)
+
+def new_ranges(var, op, n, xl,xh,ml,mh,al,ah,sl,sh):
+  if var=='x':
+    xl,xh = new_range(op, n, xl, xh)
+  elif var=='m':
+    ml,mh = new_range(op, n, ml, mh)
+  elif var=='a':
+    al,ah = new_range(op, n, al, ah)
+  elif var=='s':
+    sl,sh = new_range(op, n, sl, sh)
+  return (xl,xh,ml,mh,al,ah,sl,sh)
+# x m a s
+ans = 0
+Q = deque([('in', 1, 4000, 1, 4000, 1, 4000, 1,4000)])
+while Q:
+  state, xl,xh,ml,mh,al,ah,sl,sh = Q.pop()
+  #print(state, xl, xh, ml, mh, al, ah, sl, sh, ans)
+  if xl>xh or ml>mh or al>ah or sl>sh:
+    continue
+  if state=='A':
+    print(f"ranges: {xl} {xh} / {ml} {mh} / {al} {ah} / {sl} {sh}")
+    score = (xh-xl+1)*(mh-ml+1)*(ah-al+1)*(sh-sl+1)
+    #print(state, xl, xh, ml, mh, al, ah, sl, sh, ans, score)
+    ans += score
+    continue
+  elif state=='R':
+    continue
+  else:
+    rule = R[state]
+    for cmd in rule.split(','):
+      applies = True
+      res = cmd
+      if ':' in cmd:
+        cond,res = cmd.split(':')
+        var = cond[0]
+        op = cond[1]
+        n = int(cond[2:])
+        #print(state, var, op, n, *new_ranges(var, op, n, xl, xh, ml, mh, al, ah,sl, sh))
+        Q.append((res, *new_ranges(var, op, n, xl, xh, ml, mh, al, ah,sl, sh)))
+        xl,xh,ml,mh,al,ah,sl,sh = new_ranges(var, '<=' if op=='>' else '>=', n, xl, xh, ml, mh, al, ah,sl, sh)
+        #print(xl,xh,ml,mh,al,ah,sl,sh)
+      else:
+        Q.append((res, xl, xh, ml, mh, al, ah, sl, sh))
+        break
+print(ans)
