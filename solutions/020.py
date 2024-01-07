@@ -27,8 +27,9 @@ example_2 = """broadcaster -> a
 %b -> con
 &con -> output"""
 
-# k -> name : value -> [type, [after], [before]]
+# k -> name : value -> [state, type, [after], [before]]
 # broadcaster : [broadcaster, [a, b, c]]
+# after I am through, go to all conjunction modules and add before modules?? 
 
 def parse(inp: str):
     example = inp.split("\n")
@@ -39,22 +40,41 @@ def parse(inp: str):
         if "%" in source: 
             name = source.replace("%", "").strip() 
             t = "%" 
+            state = 0  # off
+            before = None
         elif "&" in source:
             name = source.replace("&", "").strip()
             t = "&" 
+            state = None
+            before = []
         elif "broadcaster" in source:
             name = source.strip()
             t = source.strip()
+            state = None
+            before = None
         else: 
             raise ValueError(f"There is a problem with the source value: {source}") 
         dest = val[1]
         if "," in dest: 
             dest = [el.strip() for el in dest.split(",")]
-            G[name] = [t, dest]
+            G[name] = [state, t, dest, before]
         else: 
-            G[name] = [t, [dest.strip()]] 
+            G[name] = [state, t, [dest.strip()], before] 
 
     print(G)
 
-parse(example_1)
-parse(example_2)
+    #TODO fill in before lists  
+    
+    return G
+
+G = parse(example_1)
+G = parse(example_2)
+
+Q = ["before"]
+
+while Q: 
+    curr = Q.pop(0)
+    module = G[curr]
+    # broadcaster -> send low pulse to all connections 
+
+
