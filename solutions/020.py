@@ -61,20 +61,34 @@ def parse(inp: str):
         else: 
             G[name] = [state, t, [dest.strip()], before] 
 
-    print(G)
+    # fill in before lists  
+    cons = [] 
+    for k, v in G.items(): 
+        if v[1] == "&":
+            cons.append(k)
 
-    #TODO fill in before lists  
-    
+    for con in cons: 
+        for k, v in G.items():
+            if con in v[2]:
+                G[con][3].append(k)
+
+    print(G)
     return G
 
 G = parse(example_1)
-G = parse(example_2)
 
-Q = ["before"]
+Q = ["broadcaster"]
 
 while Q: 
     curr = Q.pop(0)
     module = G[curr]
     # broadcaster -> send low pulse to all connections 
 
+    for nxt in module[2]: 
+        ...
+        # do stuff 
+        # check all &conjunction modules 
+        # send from conjuction modules
+        
 
+G = parse(example_2)
