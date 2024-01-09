@@ -39,6 +39,10 @@ class Module:
         self.adjs = adjs 
         self.before = before 
 
+    def __repr__(self): 
+        return f"{self.name} | {self.kind} | {self.state} | {self.adjs} | {self.before}"
+    
+
     def process(self, pulse: int) -> dict: 
         # receives a low pulse {0} or a high pulse {1}
         # flip-flop 
@@ -73,57 +77,67 @@ def parse(inp: str):
                 adjs=None,
                 before=None,
             ) 
-            name = source.replace("%", "").strip() 
-            t = "%" 
-            state = 0  # off
-            before = None
         elif "&" in source:
-            name = source.replace("&", "").strip()
-            t = "&" 
-            state = None
-            before = []
+            module = Module(
+                name=source.replace("&", "").strip(),
+                kind="&",
+                state=0,
+                adjs=None,
+                before=[],
+            ) 
         elif "broadcaster" in source:
-            name = source.strip()
-            t = source.strip()
-            state = None
-            before = None
+            module = Module(
+                name=source.strip(),
+                kind=source.strip(),
+                state=None,
+                adjs=None,
+                before=None,
+            ) 
         else: 
             raise ValueError(f"There is a problem with the source value: {source}") 
+        
         dest = val[1]
         if "," in dest: 
             dest = [el.strip() for el in dest.split(",")]
-            G[name] = [state, t, dest, before]
+            module.adjs = dest 
+            G[module.name] = module 
         else: 
-            G[name] = [state, t, [dest.strip()], before] 
+            module.adjs = [dest.strip()]
+            G[module.name] = module 
 
     # fill in before lists  
     cons = [] 
     for k, v in G.items(): 
-        if v[1] == "&":
+        if v.kind == "&":
             cons.append(k)
 
     for con in cons: 
         for k, v in G.items():
-            if con in v[2]:
-                G[con][3].append(k)
+            if con in v.adjs:
+                G[con].before.append(k)
 
-    print(G)
     return G
 
 G = parse(example_1)
 
+for k, v in G.items():
+    print(v)
+
 Q = ["broadcaster"]
+instructions = {}
 
 while Q: 
-    curr = Q.pop(0)
-    module = G[curr]
+    curr_name = Q.pop(0)
+    module = G[curr_name]
+    
     # broadcaster -> send low pulse to all connections 
-
-    for nxt in module[2]: 
-        ...
-        # do stuff 
-        # check all &conjunction modules 
-        # send from conjuction modules
-        
+    
+    for nxt in module.adjs: 
+        if curr_name == "broadcaster": 
+            # low pulse 
+            next_instructions = nxt.process(0) 
+            # now check conjunction modules (&) 
+            # send from conjuction modules
+          
 
 G = parse(example_2)
