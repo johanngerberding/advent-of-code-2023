@@ -31,6 +31,34 @@ example_2 = """broadcaster -> a
 # broadcaster : [broadcaster, [a, b, c]]
 # after I am through, go to all conjunction modules and add before modules?? 
 
+class Module:
+    def __init__(self, name, kind, state, adjs, before):
+        self.name = name 
+        self.kind = kind 
+        self.state = state
+        self.adjs = adjs 
+        self.before = before 
+
+    def process(self, pulse: int) -> dict: 
+        # receives a low pulse {0} or a high pulse {1}
+        # flip-flop 
+        instructions = {} 
+        if pulse == 1:
+            # high pulse -> do nothing 
+            return instructions 
+        elif pulse == 0: 
+            if self.state == 0: 
+                # send high pulse adjs 
+                for adj in self.adjs: 
+                    instructions[adj] = 1
+            else: 
+                # send low pulse to adjs 
+                for adj in self.adjs: 
+                    instructions[adj] = 0 
+
+        return instructions
+
+
 def parse(inp: str):
     example = inp.split("\n")
     G = {} 
@@ -38,6 +66,13 @@ def parse(inp: str):
         val = el.split("->")
         source = val[0]
         if "%" in source: 
+            module = Module(
+                name=source.replace("%", "").strip(),
+                kind="%",
+                state=0,
+                adjs=None,
+                before=None,
+            ) 
             name = source.replace("%", "").strip() 
             t = "%" 
             state = 0  # off
