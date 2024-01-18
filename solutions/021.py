@@ -29,6 +29,13 @@ stack = [start]
 tree = {start: set()} 
 c = 0
 visited = set()
+goal = 6
+
+def height(node: tuple):
+    print(node)
+    if len(tree[node]) == 0:
+        return 0 
+    return max([height(adj) for adj in tree[node]]) + 1
 
 while stack:
     c += 1 
@@ -56,11 +63,12 @@ while stack:
         stack.append((row, col+1, right))
         tree[(row, col, val)].add((row, col+1, right))
 
+    if height(start) == goal:
+        break
     # print(len(stack))
     # print(stack) 
     # print(tree)
     # if c == 5: 
     #     break
 
-print(tree)
-
+print(len(tree))
