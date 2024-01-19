@@ -3,7 +3,7 @@
 # 64 steps, 1 -> 4 -> 16 -> 64 -> ...
 
 
-example_map = """...........
+data = """...........
 .....###.#.
 .###.##..#.
 ..#.#...#..
@@ -16,30 +16,33 @@ example_map = """...........
 ...........
 """
 
-example_map = [[c for c in line] for line in example_map.split("\n")]
+#with open("../inputs/021.txt", "r") as fp: 
+#    data = fp.read()
+
+example_map = [[c for c in line] for line in data.split("\n")]
 
 start = None
 for row, line in enumerate(example_map):
     for col, c in enumerate(line): 
         if c == 'S':
-            start = (row, col, 'S')
+            start = (row, col, 'S', 0)
 
 assert start is not None
 stack = [start]
 tree = {start: set()} 
 c = 0
 visited = set()
-goal = 6
+steps = 0
 
-def height(node: tuple):
-    print(node)
+def get_height(node: tuple):
+    if node not in tree:
+        return 0
     if len(tree[node]) == 0:
         return 0 
-    return max([height(adj) for adj in tree[node]]) + 1
+    return max([get_height(adj) for adj in tree[node]]) + 1
 
-while stack:
-    c += 1 
-    row, col, val = stack.pop()
+while stack: 
+    row, col, val, height = stack.pop()
     visited.add((row, col, val))
     up = example_map[row - 1][col] if row-1 > 0 else None
     down = example_map[row + 1][col] if row+1 < len(example_map[0]) - 1 else None 
@@ -48,27 +51,25 @@ while stack:
     
     # print(up, down, left, right) 
     if (row, col, val) not in tree:
-        tree[(row, col, val)] = set() 
+        tree[(row, col, val, height)] = set() 
 
-    if up == '.' and (row-1, col, up) not in visited:
-        stack.append((row-1, col, up))
-        tree[(row, col, val)].add((row-1, col, up)) 
+    if up == '.' and (row-1, col, up) not in visited: 
+        stack.append((row-1, col, up, height + 1))
+        tree[(row, col, val, height)].add((row-1, col, up, height + 1))  
     if down == '.' and (row+1, col, down) not in visited:
-        stack.append((row+1, col, down))
-        tree[(row, col, val)].add((row+1, col, down))
+        stack.append((row+1, col, down, height + 1))
+        tree[(row, col, val, height)].add((row+1, col, down, height + 1))
     if left == '.' and (row, col-1, left) not in visited:
-        stack.append((row, col-1, left))
-        tree[(row, col, val)].add((row, col-1, left)) 
+        stack.append((row, col-1, left, height + 1))
+        tree[(row, col, val, height)].add((row, col-1, left, height + 1)) 
     if right == '.' and (row, col+1, right) not in visited:
-        stack.append((row, col+1, right))
-        tree[(row, col, val)].add((row, col+1, right))
+        stack.append((row, col+1, right, height + 1))
+        tree[(row, col, val, height)].add((row, col+1, right, height + 1))
 
-    if height(start) == goal:
-        break
-    # print(len(stack))
-    # print(stack) 
-    # print(tree)
-    # if c == 5: 
-    #     break
+    
+print(len(visited))
+res = 0 
+for k, v in tree.items():
+    res += len([el for el in v if el[3] < 6])
 
-print(len(tree))
+print(res -1)
