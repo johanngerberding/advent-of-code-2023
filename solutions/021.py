@@ -69,7 +69,6 @@ while True:
     steps += 1 
     new_positions = set() 
     while positions:
-        # track the positions relative to 'S' ??? 
         row, col, val, rel_row, rel_col = positions.pop()
 
         if row - 1 >= 0:
@@ -122,17 +121,3 @@ while True:
         break 
 
 print(len(positions))
-# for pos in positions: 
-#     row, col, val = pos 
-#     example_map[row][col] = "O"
-
-# for row in example_map: 
-#     print(''.join(row))
-
-model = np.polyfit(
-    [6, 10, 50, 100, 500, 1000, 5000], 
-    [16, 50, 1594, 6536, 167004, 668697, 16733044], 
-    2,
-)
-predict = np.poly1d(model)
-print(predict(26501365))
